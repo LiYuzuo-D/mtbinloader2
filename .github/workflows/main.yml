@@ -14,6 +14,7 @@ jobs:
     - name: Set up Rust
       uses: dtolnay/rust-toolchain@stable
       with:
+        toolchain: 1.75.0 # 强制指定 Rust 编译器版本，避免最新版语法冲突
         targets: aarch64-linux-android
 
     - name: Install Android NDK
