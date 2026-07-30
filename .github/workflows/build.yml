@@ -15,29 +15,22 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Setup Rust
-        run: rustup update stable
+        run: |
+          rustup update stable
+          rustup target add ${{matrix.target}}
         
       - name: Setup Cache
         uses: Swatinem/rust-cache@v2  
         
-      - name: Get version
-        id: get-version
-        run: |
-          echo "version=$(rustc --version)" >> $GITHUB_OUTPUT
-        shell: bash
-        
       - name: Install cargo-ndk via binstall
-        # 核心修改：利用 binstall 自动匹配官方发布页的最新 Linux 二进制可执行文件
-        # 免去手动写 curl 链接的烦恼，绝对不会下错文件
+        # 使用最高效、最不易出错的方式直接获取编译好的工具二进制文件
         run: |
           curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install.sh | sh
-          cargo binstall --disable-confirm cargo-ndk@3.8.1
+          cargo binstall --disable-confirm cargo-ndk
         shell: bash
         
-      - name: Install target
-        run: rustup target add ${{matrix.target}}
-        
       - name: build
+        # 针对你仓库中设定的 profile.githubci 进行交叉编译
         run: cargo ndk -t ${{matrix.target}} build --profile githubci 
         
       - name: Upload artifacts
