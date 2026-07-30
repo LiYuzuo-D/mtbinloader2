@@ -2,37 +2,43 @@ name: Ci-Build
 
 on:
   push:
+  workflow_dispatch: # 允许在 GitHub 网页上手动点击运行
 
 jobs:
   build:
     strategy:
       matrix:
         target: 
-          - aarch64-linux-android
-          - x86_64-linux-android
-          - armv7-linux-androideabi
+          - aarch64-linux-android # 仅保留手机所需的 64 位安卓架构，极大提升编译速度
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
       - name: Setup Rust
         run: rustup update stable
+        
       - name: Setup Cache
         uses: Swatinem/rust-cache@v2  
+        
       - name: Get version
         id: get-version
         run: |
           echo "version=$(rustc --version)" >> $GITHUB_OUTPUT
         shell: bash
+        
       - name: Install cargo ndk
-        run: cargo install cargo-ndk
+        # 锁死一个极具兼容性的旧版本 cargo-ndk，防止因最新版编译失败导致 exit code 101
+        run: cargo install cargo-ndk --version 3.8.1
         shell: bash  
+        
       - name: Install target
         run: rustup target add ${{matrix.target}}
+        
       - name: build
         run: cargo ndk -t ${{matrix.target}} build --profile githubci 
+        
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: mtbinloader2-${{ matrix.target }}
           path: target/${{ matrix.target }}/githubci/libmtbinloader2.so
-
