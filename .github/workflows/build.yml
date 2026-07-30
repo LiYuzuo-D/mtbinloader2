@@ -22,15 +22,16 @@ jobs:
       - name: Setup Cache
         uses: Swatinem/rust-cache@v2  
         
-      - name: Install cargo-ndk via binstall
-        # 使用最高效、最不易出错的方式直接获取编译好的工具二进制文件
-        run: |
-          curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install.sh | sh
-          cargo binstall --disable-confirm cargo-ndk
+      - name: Install cargo-binstall via Official Action
+        # 核心修改：使用 taiki-e 的官方 action 来安装 binstall，彻底杜绝 404 链接失效问题
+        uses: taiki-e/install-action@cargo-binstall
+
+      - name: Install cargo-ndk
+        # 有了稳固的 binstall，直接一行命令秒装 cargo-ndk
+        run: cargo binstall --disable-confirm cargo-ndk
         shell: bash
         
       - name: build
-        # 针对你仓库中设定的 profile.githubci 进行交叉编译
         run: cargo ndk -t ${{matrix.target}} build --profile githubci 
         
       - name: Upload artifacts
