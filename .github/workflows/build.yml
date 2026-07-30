@@ -15,10 +15,8 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Setup Rust
-        # 移除 stable，强制安装并锁定老版本编译器
-        run: |
-          rustup toolchain install 1.72.0
-          rustup default 1.72.0
+        # 回归最新的 stable 编译器，解决 1.78 版本依赖限制
+        run: rustup update stable
         
       - name: Setup Cache
         uses: Swatinem/rust-cache@v2  
@@ -30,8 +28,8 @@ jobs:
         shell: bash
         
       - name: Install cargo ndk
-        # 配合老版本 Rust，安装兼容的 cargo-ndk
-        run: cargo install cargo-ndk --version 2.12.0
+        # 核心修复：加上 --locked 强制锁死当年发布时的依赖版本，不让它乱下载最新依赖
+        run: cargo install cargo-ndk --version 3.8.1 --locked
         shell: bash  
         
       - name: Install target
