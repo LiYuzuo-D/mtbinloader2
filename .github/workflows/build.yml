@@ -26,15 +26,12 @@ jobs:
           echo "version=$(rustc --version)" >> $GITHUB_OUTPUT
         shell: bash
         
-      - name: Download Prebuilt cargo-ndk
-        # 核心修改：绕过所有第三方 Action 和编译，直接用官方发布的 Linux 二进制包
+      - name: Install cargo-ndk via binstall
+        # 核心修改：利用 binstall 自动匹配官方发布页的最新 Linux 二进制可执行文件
+        # 免去手动写 curl 链接的烦恼，绝对不会下错文件
         run: |
-          curl -L https://github.com/clsestrada/cargo-ndk/releases/download/v3.8.1/cargo-ndk-v3.8.1-x86_64-unknown-linux-gnu.zip -o cargo-ndk.zip
-          unzip cargo-ndk.zip
-          chmod +x cargo-ndk
-          mkdir -p ~/.cargo/bin
-          mv cargo-ndk ~/.cargo/bin/
-          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install.sh | sh
+          cargo binstall --disable-confirm cargo-ndk@3.8.1
         shell: bash
         
       - name: Install target
