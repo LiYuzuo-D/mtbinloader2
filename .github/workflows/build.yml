@@ -2,20 +2,23 @@ name: Ci-Build
 
 on:
   push:
-  workflow_dispatch: # 允许在 GitHub 网页上手动点击运行
+  workflow_dispatch:
 
 jobs:
   build:
     strategy:
       matrix:
         target: 
-          - aarch64-linux-android # 仅保留手机所需的 64 位安卓架构，极大提升编译速度
+          - aarch64-linux-android
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       
       - name: Setup Rust
-        run: rustup update stable
+        # 移除 stable，强制安装并锁定老版本编译器
+        run: |
+          rustup toolchain install 1.72.0
+          rustup default 1.72.0
         
       - name: Setup Cache
         uses: Swatinem/rust-cache@v2  
@@ -27,8 +30,8 @@ jobs:
         shell: bash
         
       - name: Install cargo ndk
-        # 锁死一个极具兼容性的旧版本 cargo-ndk，防止因最新版编译失败导致 exit code 101
-        run: cargo install cargo-ndk --version 3.8.1
+        # 配合老版本 Rust，安装兼容的 cargo-ndk
+        run: cargo install cargo-ndk --version 2.12.0
         shell: bash  
         
       - name: Install target
