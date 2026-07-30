@@ -23,12 +23,11 @@ jobs:
         uses: Swatinem/rust-cache@v2  
         
       - name: Install cargo-binstall via Official Action
-        # 核心修改：使用 taiki-e 的官方 action 来安装 binstall，彻底杜绝 404 链接失效问题
         uses: taiki-e/install-action@cargo-binstall
 
       - name: Install cargo-ndk
-        # 有了稳固的 binstall，直接一行命令秒装 cargo-ndk
-        run: cargo binstall --disable-confirm cargo-ndk
+        # 核心修改：删除了报错的 --disable-confirm，直接干净利落地安装
+        run: cargo binstall -y cargo-ndk
         shell: bash
         
       - name: build
