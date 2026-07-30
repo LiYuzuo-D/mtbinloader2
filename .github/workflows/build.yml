@@ -26,9 +26,16 @@ jobs:
           echo "version=$(rustc --version)" >> $GITHUB_OUTPUT
         shell: bash
         
-      - name: Install cargo ndk (Prebuilt)
-        # 核心修改：使用他人写好的成熟 Action 直接下载官方预编译好的二进制，跳过繁琐且易错的编译步骤！
-        uses: davidtwco/cargo-ndk-action@v1
+      - name: Download Prebuilt cargo-ndk
+        # 核心修改：绕过所有第三方 Action 和编译，直接用官方发布的 Linux 二进制包
+        run: |
+          curl -L https://github.com/clsestrada/cargo-ndk/releases/download/v3.8.1/cargo-ndk-v3.8.1-x86_64-unknown-linux-gnu.zip -o cargo-ndk.zip
+          unzip cargo-ndk.zip
+          chmod +x cargo-ndk
+          mkdir -p ~/.cargo/bin
+          mv cargo-ndk ~/.cargo/bin/
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        shell: bash
         
       - name: Install target
         run: rustup target add ${{matrix.target}}
